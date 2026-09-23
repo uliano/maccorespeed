@@ -308,7 +308,8 @@ typedef struct {
 
 static round_t *g_rounds;
 static int g_nrounds, g_cap_rounds;
-static double g_steady_at = NAN, g_sust_drift = NAN;
+static double g_steady_at = NAN, g_sust_se = NAN;
+static int g_sust_n;
 static int g_not_steady;
 
 static double score_of(const double *rate)
@@ -663,15 +664,12 @@ static void phase_sustained(pool_t *p, FILE *csv)
     R_sust.bg_max = a.m.bg_cores;
     R_sust.valid = 1;
     {
-        /* drift during the measurement itself, as a sanity check */
-        int h = from + (g_nrounds - from) / 2;
-        if (h > from && h < g_nrounds) {
-            round_t x, y;
-            rounds_avg(from, h, &x);
-            rounds_avg(h, g_nrounds, &y);
-            double dt = (y.t - x.t) / 60.0;
-            if (dt > 0) g_sust_drift = (y.score - x.score) / x.score * 100 / dt;
-        }
+        /* precision of the sustained score: standard error of the mean of the measured rounds */
+        int n = g_nrounds - from;
+        double ss = 0;
+        for (int i = from; i < g_nrounds; i++) ss += (g_rounds[i].score - a.score) * (g_rounds[i].score - a.score);
+        if (n >= 3) g_sust_se = 100 * sqrt(ss / (n - 1) / n) / a.score;
+        g_sust_n = n;
     }
     printf("  => multi-core sustained score: %.0f", R_sust.score);
     if (R_burst.valid) printf("  (%.1f%% of burst)", 100 * R_sust.score / R_burst.score);
@@ -754,7 +752,7 @@ static void summary(void)
         printf("\n");
         if (!isnan(g_steady_at)) printf("  Steady state reached after    %6s", fmt_time(g_steady_at, t));
         else printf("  Steady state                  %6s", "no");
-        if (!isnan(g_sust_drift)) printf("   (drift while measuring %+.2f %%/min)", g_sust_drift);
+        if (!isnan(g_sust_se)) printf("   (sustained score +/-%.1f%%, mean of %d rounds)", g_sust_se, g_sust_n);
         printf("\n");
 
         /* first time the score went below 97% of the reference and stayed there for two rounds */
