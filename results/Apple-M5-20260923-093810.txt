@@ -1,0 +1,96 @@
+────────────────────────────────────────────────────────────────────────────────
+maccorespeed 1.0 - CPU single-core, multi-core burst and sustained benchmark
+────────────────────────────────────────────────────────────────────────────────
+  Machine   MacBook Air (15-inch, M5) [Mac17,4]
+  CPU       Apple M5, 10 cores = 4 Super + 6 Efficiency, 32 GB RAM
+  macOS     27.0 (26A428)
+  Build     Apple clang version 21.0.0, -O3 -mcpu=apple-m5
+  Power     AC Power, battery 100%, Low Power Mode off
+  Sensors   CPU temperature = hottest of 18 SMC CPU core sensors; 0 fans
+  Self-test sort ok, lz ok (ratio 2.23), nbody ok (-0.169087605), sgemm ok (max err 8.8e-06)
+  Idle      CPU 50.2 C, other processes using 0.59 cores, thermal pressure nominal
+
+[1/3] Single-core  1 thread, best of 3 x 1.0 s per kernel
+  kernel workload                           rate    GHz    IPC  CPU W
+  sort   quicksort 32K x u32       30.61 Melem/s   4.46   0.89    4.3
+  lz     LZ77 compress 64 KB        1097 MB/s      4.36   2.15    4.7
+  nbody  5-body sim, double        28.26 Msteps/s  4.42   1.82    4.7
+  sgemm  SGEMM 192^3, fp32 FMA     116.8 GFLOPS    4.33   4.41    7.9
+  => single-core score: 1001
+
+  cool-down before the burst test: 69.4 C -> 44.7 C in 20 s
+
+[2/3] Multi-core burst  10 threads, 0.2 s warm-up + 1.0 s per kernel (5 s in total)
+  kernel             rate    x1T  S GHz  E GHz   busy S/E  CPU W  temp C
+  sort      246.1 Melem/s   8.04   4.25   2.96   4.0/5.8    19.9      60
+  lz         8016 MB/s      7.31   4.24   2.96   4.0/5.9    24.9      81
+  nbody     221.7 Msteps/s  7.85   4.23   2.96   4.0/5.9    23.4      92
+  sgemm     744.6 GFLOPS    6.37   3.45   2.96   4.0/5.9    23.4      98
+  => multi-core burst score: 7371  (7.36 x single-core)
+
+  cool-down before the sustained test: 98.1 C -> 45.3 C in 20 s
+
+[3/3] Multi-core sustained  10 threads, rounds of 4 x 1.0 s, until steady state (max 20 min)
+  steady state = score drift < 1.0 %/min and temperature drift < 1.0 C/min over 120 s,
+  then measured for 60 s. Ctrl-C stops early and prints what has been measured.
+   time   score  %burst  S GHz  E GHz   busy S/E  CPU W  temp C  pressure
+   0:13    7185    97.5   3.87   2.96   4.0/5.8    20.8      95  nominal
+   0:25    6794    92.2   3.54   2.96   4.0/5.8    17.0     101  nominal
+   0:38    6680    90.6   3.40   2.95   4.0/5.8    15.9     101  nominal
+   0:50    6582    89.3   3.34   2.94   4.0/5.8    15.3     101  nominal
+   1:03    6498    88.2   3.29   2.93   4.0/5.7    14.8     101  nominal
+   1:16    6566    89.1   3.27   2.93   4.0/5.8    14.7     102  moderate
+   1:28    6564    89.1   3.26   2.92   4.0/5.9    14.6     102  moderate
+   1:41    6524    88.5   3.23   2.92   4.0/5.9    14.3     101  moderate
+   1:53    6464    87.7   3.18   2.91   4.0/5.8    13.9     101  heavy
+   2:06    6464    87.7   3.16   2.91   4.0/5.8    13.8     101  heavy
+   2:19    6340    86.0   3.10   2.91   4.0/5.8    13.3     100  heavy
+   2:31    6191    84.0   2.99   2.90   4.0/5.7    12.4      98  heavy
+   2:44    6253    84.8   2.96   2.90   4.0/5.8    12.3      96  heavy
+   2:56    6160    83.6   2.86   2.90   4.0/5.8    11.6      94  heavy
+   3:09    6067    82.3   2.77   2.90   4.0/5.8    11.1      92  heavy
+   3:22    5912    80.2   2.68   2.89   4.0/5.7    10.6      91  heavy
+   3:34    5555    75.4   2.61   2.89   3.8/5.4     9.8      90  heavy
+   3:47    5765    78.2   2.61   2.88   4.0/5.6    10.1      89  heavy
+   4:00    5660    76.8   2.56   2.87   4.0/5.6     9.7      88  heavy
+   4:12    5798    78.7   2.57   2.88   4.0/5.7     9.9      87  heavy
+   4:25    5807    78.8   2.56   2.87   4.0/5.7     9.9      87  heavy
+   4:37    5800    78.7   2.60   2.88   4.0/5.7    10.0      87  heavy
+   4:50    5491    74.5   2.56   2.87   3.9/5.4     9.4      86  heavy
+   5:03    5650    76.7   2.56   2.88   3.9/5.6     9.7      87  heavy
+   5:15    5740    77.9   2.59   2.88   4.0/5.6     9.9      87  heavy
+   5:28    5881    79.8   2.61   2.89   4.0/5.7    10.1      87  heavy
+   5:32    5990    81.3   2.64   2.89   4.0/5.9    10.4      87  heavy
+  -- steady state at 5:32 (score -0.04 %/min, temperature -0.96 C/min): measuring for 60 s
+   5:45    5981    81.1   2.63   2.89   4.0/5.9    10.3      87  heavy
+   5:57    5931    80.5   2.63   2.89   4.0/5.8    10.2      87  heavy
+   6:10    5821    79.0   2.61   2.88   4.0/5.7    10.1      87  heavy
+   6:22    5994    81.3   2.64   2.89   4.0/5.9    10.4      87  heavy
+   6:35    6000    81.4   2.65   2.89   4.0/5.9    10.4      87  heavy
+  => multi-core sustained score: 5945  (80.7% of burst)
+  per kernel, sustained vs burst:  sort 84%  lz 80%  nbody 85%  sgemm 75%
+  time series: results/Apple-M5-20260923-093810.csv
+
+────────────────────────────────────────────────────────────────────────────────
+SUMMARY  MacBook Air (15-inch, M5), Apple M5, 10 cores (4 Super + 6 Efficiency)
+────────────────────────────────────────────────────────────────────────────────
+  Single-core score               1001
+  Multi-core burst score          7371   7.36 x single-core
+  Multi-core sustained score      5945   80.7% of burst (-19.3%)
+  Steady state reached after      5:32   (drift while measuring +1.38 %/min)
+  Throttling onset (< 97%)        0:13   (rounds of 4 s)
+  Burst clock and power         S-cores 4.04 GHz, E-cores 2.96 GHz, CPU 22.9 W
+  Sustained clock and power     S-cores 2.63 GHz, E-cores 2.89 GHz, CPU 10.3 W
+
+  sustained score over time, % of burst:
+   105% ┤                                                                
+        │█▁                                                              
+    95% ┤██▅▂▁                                                           
+        │██████▇▆▅▄▆▆▆▆▆▅▄▄▄▄▃▂                                          
+    85% ┤██████████████████████▇▄▇█▇▅▄▃▁                     ▁▂▁▂ ▂ ▁▂▂▂▂
+        │█████████████████████████████████▄ ▄▆▃▂▅▅▅▇█▁   █▃▆▆██████▄█████
+    75% ┤██████████████████████████████████ ███████████▄▇████████████████
+        │██████████████████████████████████▇█████████████████████████████
+    65% └────────────────────────────────────────────────────────────────
+         0:04                                                       6:35
+────────────────────────────────────────────────────────────────────────────────

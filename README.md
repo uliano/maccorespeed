@@ -41,6 +41,52 @@ on a hard surface and don't touch it while it runs. The program warns you if oth
 processes use CPU while it runs. You can press Ctrl-C during the sustained phase: it stops
 and prints a summary of what it has measured so far.
 
+## Results
+
+| Mac | Single-core | Multi-core burst | Multi-core sustained | Sustained / burst |
+|-----|------------:|-----------------:|---------------------:|------------------:|
+| MacBook Air (15-inch, M5): 4 Super + 6 Efficiency cores, no fan | 1001 | 7371 | 5945 | 80.7% |
+| M2 Pro | *coming soon* | | | |
+
+### MacBook Air (15-inch, M5)
+
+macOS 27.0, Apple clang 21.0.0 `-O3 -mcpu=apple-m5`, AC power, 2026-09-23. Full output:
+[log](results/Apple-M5-20260923-093810.txt), sustained time series:
+[CSV](results/Apple-M5-20260923-093810.csv).
+
+| | single-core | multi-core burst | multi-core sustained | sustained / burst |
+|---|---:|---:|---:|---:|
+| sort (Melem/s) | 30.6 | 246.1 | 205.8 | 84% |
+| lz (MB/s) | 1097 | 8016 | 6375 | 80% |
+| nbody (Msteps/s) | 28.3 | 221.7 | 187.7 | 85% |
+| sgemm (GFLOPS) | 116.8 | 744.6 | 559.9 | 75% |
+| Super cores clock | 4.33-4.46 GHz | 4.04 GHz | 2.63 GHz | |
+| Efficiency cores clock | | 2.96 GHz | 2.89 GHz | |
+| CPU power | 4.3-7.9 W | 22.9 W | 10.3 W | |
+
+- The multi-core burst is 7.36x the single-core score.
+- Throttling starts 5-6 s after a cold start. The sustained phase reached steady state
+  after 5:32, at 19% below the burst score.
+- Only the Super cores slow down, from about 4.0 to 2.6 GHz. The Efficiency cores stay at
+  about 2.9 GHz, and macOS never moves the threads off the Super cores.
+- The hottest core sensor reaches about 100 °C in about 15 s. It then falls to about 87 °C
+  while CPU power keeps dropping from 23 to 10 W, so what limits the chip in the long run
+  is the chassis temperature, not the die.
+
+```
+  sustained score over time, % of burst:
+   105% ┤
+        │█▁
+    95% ┤██▅▂▁
+        │██████▇▆▅▄▆▆▆▆▆▅▄▄▄▄▃▂
+    85% ┤██████████████████████▇▄▇█▇▅▄▃▁                     ▁▂▁▂ ▂ ▁▂▂▂▂
+        │█████████████████████████████████▄ ▄▆▃▂▅▅▅▇█▁   █▃▆▆██████▄█████
+    75% ┤██████████████████████████████████ ███████████▄▇████████████████
+        │██████████████████████████████████▇█████████████████████████████
+    65% └────────────────────────────────────────────────────────────────
+         0:04                                                       6:35
+```
+
 ## What it runs
 
 Four small kernels that fit in L1/L2, so they measure the cores and not memory:
